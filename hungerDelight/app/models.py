@@ -1,55 +1,64 @@
 from django.db import models
+from datetime import datetime
 
 # Create your models here.
 
 
-class Merchants(models.Model):
+class Merchant(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
     mobile = models.CharField(max_length=10)
 
 
-class Stores(models.Model):
+class Store(models.Model):
     name = models.CharField(max_length=255)
     merchant = models.ForeignKey(
-        'Merchants',
+        'Merchant',
         on_delete=models.CASCADE,
     )
     address = models.CharField(max_length=255)
-    lat = models.DecimalField(max_digits=18, decimal_places=15)
-    lng = models.DecimalField(max_digits=18, decimal_places=15)
+    lat = models.DecimalField(
+        max_digits=18, decimal_places=15, verbose_name='latitude')
+    lng = models.DecimalField(
+        max_digits=18, decimal_places=15, verbose_name='longitude')
     operational = models.BooleanField()
 
 
-class Items(models.Model):
+class Item(models.Model):
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=15, decimal_places=6)
-    created_at = models.DateTimeField()
-    description = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
 
 
-class Orders(models.Model):
+class Order(models.Model):
+    payment_modes = (
+        ('CASH', 'Cash'),
+        ('CARD', 'Card'),
+        ('WALLET', 'Wallet'),
+        ('NET BANKING', 'Net Banking')
+    )
+
+    status_codes = (
+        ('AWAITING', 'Awaiting'),
+        ('PENDING', 'Pending'),
+        ('SUCCESS', 'Success'),
+        ('FAILED', 'Failed')
+    )
+
     totalAmount = models.DecimalField(max_digits=19, decimal_places=6)
-    timeStamp = models.DateTimeField()
+    total_items = models.PositiveIntegerField()
+    timeStamp = models.DateTimeField(default=datetime.now, blank=True)
     store = models.ForeignKey(
-        'Stores',
+        'Store',
         on_delete=models.CASCADE
     )
     merchant = models.ForeignKey(
-        'Merchants',
+        'Merchant',
         on_delete=models.CASCADE
     )
-    status = models.BooleanField()
-    paymentMode = models.CharField(max_length=255)
-
-
-class OrderItemMapping(models.Model):
-    order = models.ForeignKey(
-        'Orders',
-        on_delete=models.CASCADE
-    )
-    item = models.ForeignKey(
-        'Items',
-        on_delete=models.CASCADE
-    )
-    quantity = models.PositiveIntegerField()
+    items = models.ManyToManyField(Item)
+    status = models.CharField(
+        max_length=100, choices=status_codes, default='SUCCESS')
+    paymentMode = models.CharField(
+        max_length=255, choices=payment_modes, default='CASH')
