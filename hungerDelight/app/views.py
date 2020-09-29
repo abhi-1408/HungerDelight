@@ -13,24 +13,42 @@ def index(request):
 
 
 @api_view(['GET'])
-def all_merchant_view(request):
+def merchant_list_view(request):
     merchants = Merchant.objects.all()
     merchant_serializer = MerchantSerializer(merchants, many=True)
-
     return Response(merchant_serializer.data)
 
 
 @api_view(['GET'])
-def all_store_view(request):
+def merchant_detail_view(request, pk):
+    merchants = Merchant.objects.get(id=pk)
+    merchant_serializer = MerchantSerializer(merchants, many=False)
+    return Response(merchant_serializer.data)
+
+
+@api_view(['GET'])
+def store_list_view(request):
     stores = Store.objects.all()
     store_serializer = StoreSerializer(stores, many=True)
-
     return Response(store_serializer.data)
 
 
 @api_view(['GET'])
-def all_item_view(request):
+def store_detail_view(request, pk):
+    stores = Store.objects.get(id=pk)
+    store_serializer = StoreSerializer(stores, many=False)
+    return Response(store_serializer.data)
+
+
+@api_view(['GET'])
+def item_list_view(request):
     items = Item.objects.all()
     item_serializer = ItemSerializer(items, many=True)
+    return Response(item_serializer.data)
 
+
+@api_view(['GET'])
+def item_detail_view(request, pk):
+    items = Item.objects.get(id=pk)
+    item_serializer = ItemSerializer(items, many=False)
     return Response(item_serializer.data)
