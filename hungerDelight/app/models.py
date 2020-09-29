@@ -24,12 +24,13 @@ class Stores(models.Model):
 class Items(models.Model):
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=15, decimal_places=6)
-    created_at = models.DateTimeField()
-    description = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
 
 
 class Orders(models.Model):
     totalAmount = models.DecimalField(max_digits=19, decimal_places=6)
+    total_items = models.PositiveIntegerField()
     timeStamp = models.DateTimeField()
     store = models.ForeignKey(
         'Stores',
