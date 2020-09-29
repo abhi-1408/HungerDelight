@@ -9,6 +9,9 @@ class Merchant(models.Model):
     email = models.EmailField()
     mobile = models.CharField(max_length=10)
 
+    def __str__(self):
+        return self.name
+
 
 class Store(models.Model):
     name = models.CharField(max_length=255)
@@ -23,12 +26,18 @@ class Store(models.Model):
         max_digits=18, decimal_places=15, verbose_name='longitude')
     operational = models.BooleanField()
 
+    def __str__(self):
+        return f'{self.merchant} - {self.name}'
+
 
 class Item(models.Model):
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=15, decimal_places=6)
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Order(models.Model):
@@ -62,3 +71,6 @@ class Order(models.Model):
         max_length=100, choices=status_codes, default='SUCCESS')
     paymentMode = models.CharField(
         max_length=255, choices=payment_modes, default='CASH')
+
+    def __str__(self):
+        return f'Orderid: {self.id} : from: {self.merchant} - {self.store}'
