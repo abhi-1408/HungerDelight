@@ -13,12 +13,27 @@ class Merchant(models.Model):
         return self.name
 
 
+class Item(models.Model):
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=15, decimal_places=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
+    merchant = models.ForeignKey(
+        'Merchant',
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class Store(models.Model):
     name = models.CharField(max_length=255)
     merchant = models.ForeignKey(
         'Merchant',
         on_delete=models.CASCADE,
     )
+    items = models.ManyToManyField(Item)
     address = models.CharField(max_length=255)
     lat = models.DecimalField(
         max_digits=18, decimal_places=15, verbose_name='latitude')
@@ -28,16 +43,6 @@ class Store(models.Model):
 
     def __str__(self):
         return f'{self.merchant} - {self.name}'
-
-
-class Item(models.Model):
-    name = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=15, decimal_places=6)
-    created_at = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
 
 
 class Order(models.Model):
