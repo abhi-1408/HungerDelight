@@ -34,7 +34,10 @@ class OrderSerializer(serializers.ModelSerializer):
         data_store_id = int(self.initial_data.get('store', default=None))
         data_merchant_id = int(self.initial_data.get('merchant', default=None))
         if data_store_id != None and data_merchant_id != None:
-            stores = Store.objects.get(id=data_store_id)
+            stores = Store.objects.filter(id=data_store_id).first()
+            if stores == None:
+                raise serializers.ValidationError(
+                    "Store Not Present")
             store_serialize = StoreSerializer(stores, many=False)
             store_merchant_id = store_serialize.data['merchant']
 
