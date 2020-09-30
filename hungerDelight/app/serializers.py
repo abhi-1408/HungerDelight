@@ -31,27 +31,27 @@ class OrderSerializer(serializers.ModelSerializer):
         Checks if the store selected belong to the merchant or not
 
         '''
-        initial_data_dict = dict(self.initial_data)
-        data_store_id = int(initial_data_dict['store'][0])
-        data_merchant_id = int(initial_data_dict['merchant'][0])
-        stores = Store.objects.get(id=data_store_id)
-        store_serialize = StoreSerializer(stores, many=False)
-        store_merchant_id = store_serialize.data['merchant']
+        data_store_id = int(self.initial_data.get('store', default=None))
+        data_merchant_id = int(self.initial_data.get('merchant', default=None))
+        if data_store_id != None and data_merchant_id != None:
+            stores = Store.objects.get(id=data_store_id)
+            store_serialize = StoreSerializer(stores, many=False)
+            store_merchant_id = store_serialize.data['merchant']
 
-        # selected store does not belong to the merchant
-        if data_merchant_id != store_merchant_id:
-            raise serializers.ValidationError(
-                "Store Does not Belong to the Merchant")
+            # selected store does not belong to the merchant
+            if data_merchant_id != store_merchant_id:
+                raise serializers.ValidationError(
+                    "Store Does not Belong to the Merchant")
 
-        return store
+            return store
+        raise serializers.ValidationError(
+            "Please select a merchant and store")
 
     def validate_total_items(self, total_items):
         '''
         Checks if the total items count is equal to the items selected
         '''
-        initial_data_dict = dict(self.initial_data)
-        items_count = len(initial_data_dict['items'])
-
+        items_count = len(self.initial_data.getlist('items', default=[]))
         if total_items != items_count:
             raise serializers.ValidationError(
                 "Total Items Count & Items Selected Count do not match, Please Check")
