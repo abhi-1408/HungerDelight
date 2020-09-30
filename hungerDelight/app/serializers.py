@@ -31,8 +31,9 @@ class OrderSerializer(serializers.ModelSerializer):
         Checks if the store selected belong to the merchant or not
 
         '''
-        data_store_id = int(self.initial_data['store'])
-        data_merchant_id = int(self.initial_data['merchant'])
+        initial_data_dict = dict(self.initial_data)
+        data_store_id = int(initial_data_dict['store'][0])
+        data_merchant_id = int(initial_data_dict['merchant'][0])
         stores = Store.objects.get(id=data_store_id)
         store_serialize = StoreSerializer(stores, many=False)
         store_merchant_id = store_serialize.data['merchant']
