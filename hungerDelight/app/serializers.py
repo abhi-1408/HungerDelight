@@ -22,9 +22,16 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    # days_since_joined = serializers.SerializerMethodField(
+    #     'get_days_since_joined')
+
     class Meta:
         model = Order
         fields = '__all__'
+        # fields = ('status', 'paymentMode', 'total')
+
+    # def get_days_since_joined(self, obj):
+    #     return (10 + obj.totalAmount)
 
     def validate_store(self, store):
         '''
