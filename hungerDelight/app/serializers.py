@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from .models import Merchant, Store, Item, Order
 import json
+from decimal import Decimal
 
 
 class MerchantSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Merchant
         fields = '__all__'
@@ -21,17 +23,50 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class OrderSerializer(serializers.ModelSerializer):
+class OrderSerializerAll(serializers.ModelSerializer):
     # days_since_joined = serializers.SerializerMethodField(
     #     'get_days_since_joined')
 
     class Meta:
         model = Order
         fields = '__all__'
-        # fields = ('status', 'paymentMode', 'total')
+        # fields = ('timeStamp', 'status', 'paymentMode',
+        #           'store', 'merchant', 'items')
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    # days_since_joined = serializers.SerializerMethodField(
+    #     'get_days_since_joined')
+
+    class Meta:
+        model = Order
+        # fields = '__all__'
+        fields = ('timestamp', 'status', 'payment_mode',
+                  'store', 'merchant', 'items')
 
     # def get_days_since_joined(self, obj):
     #     return (10 + obj.totalAmount)
+
+    def create(self, validated_data):
+        print('CREATE SERIALIZE VALIDATED DATA', self)
+        print('**********DATA IS', validated_data)
+        item_set = validated_data.pop('items', [])
+        total_items = len(item_set)
+        total_price = 0.0
+        for item in item_set:
+            total_price += float(item.price)
+
+        validated_data['total_items'] = total_items
+        validated_data['total_amount'] = total_price
+        print('**********CHANGED DATA IS', validated_data)
+        # validated_data.pop('total_items', None)
+        # validated_data.pop('totalAmount', None)
+        order = Order.objects.create(**validated_data)
+        for item in item_set:
+            order.items.add(item)
+        order.save()
+        return order
+        # return Order.objects.create(total_items=total_items, totalAmount=total_price, **validated_data)
 
     def validate_store(self, store):
         '''

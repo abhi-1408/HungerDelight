@@ -79,11 +79,11 @@ class TestCrud:
         data = response.json()
         assert [{
                 "id": data[0]['id'],
-                "totalAmount": "100.000000",
+                "total_amount": "100.000000",
                 "total_items": 2,
-                "timeStamp": data[0]['timeStamp'],
+                "timestamp": data[0]['timeStamp'],
                 "status": "SUCCESS",
-                "paymentMode": "CASH",
+                "payment_mode": "CASH",
                 "store": data[0]['store'],
                 "merchant": data[0]['merchant'],
                 "items": data[0]['items']

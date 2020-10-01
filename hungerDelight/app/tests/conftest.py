@@ -59,11 +59,11 @@ def store(db, merchant, item):
 @pytest.fixture
 def order(db, merchant, item, store):
     order = Order.objects.create(
-        totalAmount="100.00",
+        total_amount="100.00",
         total_items="2",
-        timeStamp="2020-09-30T17:19:00Z",
+        timestamp="2020-09-30T17:19:00Z",
         status="SUCCESS",
-        paymentMode="CASH",
+        payment_mode="CASH",
         store=store,
         merchant=merchant[0],
 

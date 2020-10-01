@@ -60,9 +60,9 @@ class Order(models.Model):
         ('FAILED', 'Failed')
     )
 
-    totalAmount = models.DecimalField(max_digits=19, decimal_places=6)
+    total_amount = models.DecimalField(max_digits=19, decimal_places=6)
     total_items = models.PositiveIntegerField()
-    timeStamp = models.DateTimeField(default=datetime.now, blank=True)
+    timestamp = models.DateTimeField(default=datetime.now, blank=True)
     store = models.ForeignKey(
         'Store',
         on_delete=models.CASCADE
@@ -74,7 +74,7 @@ class Order(models.Model):
     items = models.ManyToManyField(Item)
     status = models.CharField(
         max_length=100, choices=status_codes, default='SUCCESS')
-    paymentMode = models.CharField(
+    payment_mode = models.CharField(
         max_length=255, choices=payment_modes, default='CASH')
 
     def __str__(self):
