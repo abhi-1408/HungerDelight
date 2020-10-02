@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Merchant, Store, Item, Order
 import json
 from decimal import Decimal
+from django.http import QueryDict
 
 
 class MerchantSerializer(serializers.ModelSerializer):
@@ -48,8 +49,6 @@ class OrderSerializer(serializers.ModelSerializer):
     #     return (10 + obj.totalAmount)
 
     def create(self, validated_data):
-        print('CREATE SERIALIZE VALIDATED DATA', self)
-        print('**********DATA IS', validated_data)
         item_set = validated_data.pop('items', [])
         total_items = len(item_set)
         total_price = 0.0
@@ -58,21 +57,24 @@ class OrderSerializer(serializers.ModelSerializer):
 
         validated_data['total_items'] = total_items
         validated_data['total_amount'] = total_price
-        print('**********CHANGED DATA IS', validated_data)
-        # validated_data.pop('total_items', None)
-        # validated_data.pop('totalAmount', None)
+
         order = Order.objects.create(**validated_data)
         for item in item_set:
             order.items.add(item)
         order.save()
         return order
-        # return Order.objects.create(total_items=total_items, totalAmount=total_price, **validated_data)
 
     def validate_store(self, store):
         '''
         Checks if the store selected belong to the merchant or not
 
         '''
+        # get in dict format if request from postman
+        # converting dict to query dict
+        query_dict = QueryDict('', mutable=True)
+        query_dict.update(self.initial_data)
+        self.initial_data = query_dict
+
         data_store_id = int(self.initial_data.get('store', default=None))
         data_merchant_id = int(self.initial_data.get('merchant', default=None))
 
@@ -95,13 +97,13 @@ class OrderSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(
             "Please select a merchant and store")
 
-    def validate_total_items(self, total_items):
-        '''
-        Checks if the total items count is equal to the items selected
-        '''
-        items_count = len(self.initial_data.getlist('items', default=[]))
-        if total_items != items_count:
-            raise serializers.ValidationError(
-                "Total Items Count & Items Selected Count do not match, Please Check")
+    # def validate_total_items(self, total_items):
+    #     '''
+    #     Checks if the total items count is equal to the items selected
+    #     '''
+    #     items_count = len(self.initial_data.getlist('items', default=[]))
+    #     if total_items != items_count:
+    #         raise serializers.ValidationError(
+    #             "Total Items Count & Items Selected Count do not match, Please Check")
 
-        return total_items
+    #     return total_items

@@ -2,6 +2,7 @@ import pytest
 from django.urls import reverse, resolve
 from django.conf import settings
 from app.models import Merchant, Item, Store, Order
+from app.serializers import MerchantSerializer, ItemSerializer, StoreSerializer
 from app.views import MerchantViewSet
 # Create your tests here.
 from django.contrib.auth.models import User
@@ -79,12 +80,31 @@ class TestCrud:
         data = response.json()
         assert [{
                 "id": data[0]['id'],
-                "total_amount": "100.000000",
-                "total_items": 2,
-                "timestamp": data[0]['timeStamp'],
+                "total_items":1,
+                "total_amount":'100.000000',
+                "timestamp": data[0]['timestamp'],
                 "status": "SUCCESS",
                 "payment_mode": "CASH",
                 "store": data[0]['store'],
                 "merchant": data[0]['merchant'],
                 "items": data[0]['items']
                 }] == data
+
+    @ pytest.mark.django_db
+    def test_order_creation_api(self, client, store, merchant, item):
+        store_serial = StoreSerializer(store, many=False)
+        merchant_serial = MerchantSerializer(merchant, many=True)
+        item_serial = ItemSerializer(item, many=True)
+        send_data = {
+            "timestamp": "2020-10-01T22:10:00Z",
+            "status": "SUCCESS",
+            "payment_mode": "CARD",
+            "store": store_serial.data['id'],
+            "merchant": merchant_serial.data[0]['id'],
+            "items": [
+                item_serial.data[0]['id']
+            ],
+
+        }
+        response = client.post(reverse('order-list'), data=send_data)
+        assert response.status_code == 201
