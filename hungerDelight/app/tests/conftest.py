@@ -6,9 +6,7 @@ from django.contrib.auth.models import User
 
 @pytest.fixture(scope='module')
 def django_db_setup(request, django_db_setup):
-    print('executirng*******')
-    # client(admin_user)
-    # merchant(db)
+    print('executing*******')
     pass
 
 

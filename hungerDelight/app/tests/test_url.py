@@ -5,11 +5,6 @@ from app.models import Merchant, Item, Store, Order
 from app.serializers import MerchantSerializer, ItemSerializer, StoreSerializer
 from app.views import MerchantViewSet
 # Create your tests here.
-from django.contrib.auth.models import User
-from rest_framework.test import force_authenticate
-from rest_framework.test import APIRequestFactory
-from rest_framework.test import APIClient
-from mixer.backend.django import mixer
 
 
 class TestCrud:

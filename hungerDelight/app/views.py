@@ -116,15 +116,3 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = Order.objects.all()
         serializer = OrderSerializerAll(queryset, many=True)
         return Response(serializer.data)
-
-    # def create(self, request, pk=None):
-
-    # # queryset = Order.objects.all()
-    # # order = get_object_or_404(queryset, pk=pk)
-    # # serializer = UserSerializer(user)
-    # return Response({'msg': 'got the request'})
-
-    # def get_queryset(self):
-    #     print('GOT QUEERY SET AS ********', dir(self),
-    #           self.initial, self.queryset, self.serializer_class)
-    #     return Order.objects.all()

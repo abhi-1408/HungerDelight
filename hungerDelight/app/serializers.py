@@ -6,7 +6,6 @@ from django.http import QueryDict
 
 
 class MerchantSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Merchant
@@ -14,9 +13,6 @@ class MerchantSerializer(serializers.ModelSerializer):
 
 
 class StoreSerializer(serializers.ModelSerializer):
-    items = serializers.StringRelatedField(many=True)
-    # merchant = serializers.StringRelatedField()
-    id = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Store
@@ -24,8 +20,6 @@ class StoreSerializer(serializers.ModelSerializer):
 
 
 class ItemSerializer(serializers.ModelSerializer):
-    merchant = serializers.StringRelatedField()
-    id = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Item
@@ -33,36 +27,27 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializerAll(serializers.ModelSerializer):
-    # days_since_joined = serializers.SerializerMethodField(
-    #     'get_days_since_joined')
-    items = serializers.StringRelatedField(many=True)
-    store = serializers.StringRelatedField()
-    merchant = serializers.StringRelatedField()
-    id = serializers.PrimaryKeyRelatedField(read_only=True)
-
+    '''
+    To display all fields in request while for form need to display only certain fields
+    '''
     class Meta:
         model = Order
         fields = '__all__'
-        # fields = ('timeStamp', 'status', 'paymentMode',
-        #           'store', 'merchant', 'items')
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    # days_since_joined = serializers.SerializerMethodField(
-    #     'get_days_since_joined')
-    items = serializers.StringRelatedField(many=True)
-    store = serializers.StringRelatedField()
-    merchant = serializers.StringRelatedField()
-    id = serializers.PrimaryKeyRelatedField(read_only=True)
-
+    '''
+    For form display
+    '''
     class Meta:
         model = Order
         # fields = '__all__'
         fields = ('id', 'timestamp', 'status', 'payment_mode',
                   'store', 'merchant', 'items')
 
-    # def get_days_since_joined(self, obj):
-    #     return (10 + obj.totalAmount)
+    '''
+    performing calculation for total price, total items before saving
+    '''
 
     def create(self, validated_data):
         item_set = validated_data.pop('items', [])
@@ -112,14 +97,3 @@ class OrderSerializer(serializers.ModelSerializer):
             return store
         raise serializers.ValidationError(
             "Please select a merchant and store")
-
-    # def validate_total_items(self, total_items):
-    #     '''
-    #     Checks if the total items count is equal to the items selected
-    #     '''
-    #     items_count = len(self.initial_data.getlist('items', default=[]))
-    #     if total_items != items_count:
-    #         raise serializers.ValidationError(
-    #             "Total Items Count & Items Selected Count do not match, Please Check")
-
-    #     return total_items
