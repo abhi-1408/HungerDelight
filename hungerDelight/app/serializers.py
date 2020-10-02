@@ -6,6 +6,7 @@ from django.http import QueryDict
 
 
 class MerchantSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Merchant
@@ -13,12 +14,19 @@ class MerchantSerializer(serializers.ModelSerializer):
 
 
 class StoreSerializer(serializers.ModelSerializer):
+    items = serializers.StringRelatedField(many=True)
+    # merchant = serializers.StringRelatedField()
+    id = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Store
         fields = '__all__'
 
 
 class ItemSerializer(serializers.ModelSerializer):
+    merchant = serializers.StringRelatedField()
+    id = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Item
         fields = '__all__'
@@ -27,6 +35,10 @@ class ItemSerializer(serializers.ModelSerializer):
 class OrderSerializerAll(serializers.ModelSerializer):
     # days_since_joined = serializers.SerializerMethodField(
     #     'get_days_since_joined')
+    items = serializers.StringRelatedField(many=True)
+    store = serializers.StringRelatedField()
+    merchant = serializers.StringRelatedField()
+    id = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Order
@@ -38,11 +50,15 @@ class OrderSerializerAll(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     # days_since_joined = serializers.SerializerMethodField(
     #     'get_days_since_joined')
+    items = serializers.StringRelatedField(many=True)
+    store = serializers.StringRelatedField()
+    merchant = serializers.StringRelatedField()
+    id = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Order
         # fields = '__all__'
-        fields = ('timestamp', 'status', 'payment_mode',
+        fields = ('id', 'timestamp', 'status', 'payment_mode',
                   'store', 'merchant', 'items')
 
     # def get_days_since_joined(self, obj):
