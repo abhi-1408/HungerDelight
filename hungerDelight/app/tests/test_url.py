@@ -103,3 +103,94 @@ class TestCrud:
         }
         response = client.post(reverse('order-list'), data=send_data)
         assert response.status_code == 201
+
+
+class TestApi:
+    @ pytest.mark.django_db
+    @ pytest.mark.parametrize('send_data', [({
+        "timestamp": "2020-10-01T22:10:00Z",
+        "status": "SUCCESS",
+        "payment_mode": "CARD",
+        "store": 1,
+        "merchant": 2
+    }), ({
+        "timestamp": "2020-10-01T22:10:00Z",
+        "status": "SUCCESS",
+        "payment_mode": "CARD",
+        "merchant": 2,
+
+    }), ({
+        "timestamp": "2020-10-01T22:10:00Z",
+        "status": "SUCCESS",
+        "payment_mode": "CARD",
+        "items": [
+            2, 3
+        ],
+
+    }),
+    ])
+    def test_bad_order_creation_request(self, send_data, client):
+
+        response = client.post(reverse('order-list'), data=send_data)
+        assert response.status_code == 400
+
+    @ pytest.mark.django_db
+    @ pytest.mark.parametrize('send_data_merchant,send_data_item,send_data_store,send_data_order,status_code', [
+        ({
+
+            "name": "merchap1",
+            "email": "mercapi1@gmail.com",
+            "mobile": "9988998899"
+        }, {
+
+            "name": "Doda Barfi",
+            "price": "700.000000",
+            "created_at": "2020-09-30T11:46:05.547188Z",
+            "description": "Fresh Desi Ghee Made",
+            "merchant": 1
+        }, {
+
+            "name": "Delhi BB",
+            "address": "Patparganj, New Delhi",
+            "lat": "45.560000000000000",
+            "lng": "98.440000000000000",
+            "operational": True,
+            "merchant": 1,
+            "items": [
+                1
+            ]
+        },
+            {
+                "timestamp": "2020-10-01T22:10:00Z",
+                "status": "SUCCESS",
+                "payment_mode": "CARD",
+                "store": 1,
+                "merchant": 1,
+                "items": [
+                    1
+                ]
+
+        },
+            201),
+    ])
+    def test_order_creation_cycle_request(self, send_data_merchant, send_data_item, send_data_store, send_data_order, status_code, client):
+
+        response_merchant = client.post(reverse('merchant-list'),
+                                        data=send_data_merchant)
+
+        send_data_item['merchant'] = response_merchant.data['id']
+        response_item = client.post(
+            reverse('item-list'), data=send_data_item)
+
+        send_data_store['merchant'] = response_merchant.data['id']
+        send_data_store['items'] = [response_item.data['id']]
+        response_store = client.post(
+            reverse('store-list'), data=send_data_store)
+
+        send_data_order['merchant'] = response_merchant.data['id']
+        send_data_order['items'] = [response_item.data['id']]
+        send_data_order['store'] = response_store.data['id']
+        response_order = client.post(
+            reverse('order-list'), data=send_data_order)
+
+        assert response_order.status_code == status_code
