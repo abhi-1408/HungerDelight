@@ -30,6 +30,7 @@ class OrderSerializerAll(serializers.ModelSerializer):
     '''
     To display all fields in request while for form need to display only certain fields
     '''
+
     class Meta:
         model = Order
         fields = '__all__'
@@ -39,6 +40,7 @@ class OrderSerializer(serializers.ModelSerializer):
     '''
     For form display
     '''
+
     class Meta:
         model = Order
         # fields = '__all__'
@@ -79,21 +81,14 @@ class OrderSerializer(serializers.ModelSerializer):
         data_store_id = int(self.initial_data.get('store', default=None))
         data_merchant_id = int(self.initial_data.get('merchant', default=None))
 
-        if data_store_id != None and data_merchant_id != None:
-            stores = Store.objects.filter(id=data_store_id).first()
+        stores = Store.objects.filter(id=data_store_id).first()
 
-            if stores == None:
-                raise serializers.ValidationError(
-                    "Store Not Present")
+        store_serialize = StoreSerializer(stores, many=False)
+        store_merchant_id = store_serialize.data['merchant']
 
-            store_serialize = StoreSerializer(stores, many=False)
-            store_merchant_id = store_serialize.data['merchant']
+        # selected store does not belong to the merchant
+        if int(data_merchant_id) != int(store_merchant_id):
+            raise serializers.ValidationError(
+                "Store Does not Belong to the Merchant")
 
-            # selected store does not belong to the merchant
-            if data_merchant_id != store_merchant_id:
-                raise serializers.ValidationError(
-                    "Store Does not Belong to the Merchant")
-
-            return store
-        raise serializers.ValidationError(
-            "Please select a merchant and store")
+        return store
