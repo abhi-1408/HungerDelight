@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .serializers import MerchantSerializer, StoreSerializer, ItemSerializer, OrderSerializer
+from .serializers import MerchantSerializer, StoreSerializer, ItemSerializer, OrderSerializer, OrderSerializerAll
 from .models import Merchant, Store, Item, Order
 from rest_framework import viewsets
 from rest_framework.authentication import BasicAuthentication
@@ -111,3 +111,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        queryset = Order.objects.all()
+        serializer = OrderSerializerAll(queryset, many=True)
+        return Response(serializer.data)
