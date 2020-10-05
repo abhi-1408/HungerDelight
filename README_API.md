@@ -586,7 +586,7 @@
 
 ---
 
-#### POST `app/item/`
+#### POST `app/order/`
 
 ##### REQUEST
 
