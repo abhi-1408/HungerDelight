@@ -25,7 +25,7 @@ SECRET_KEY = '!ab1yd39ed#+v($wr4=n&&u!tftn-eopfezej!!9&zpk$8ksw#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -59,6 +59,7 @@ REST_FRAMEWORK = {
 
     ]
 }
+
 
 TEMPLATES = [
     {
