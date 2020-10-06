@@ -11,7 +11,7 @@ from .serializers import MerchantSerializer, ItemSerializer, StoreSerializer
 @shared_task
 def generate_order(i):
     admin_user = User.objects.filter(
-        username='abhi').first()
+        username='admin').first()
 
     client = APIClient()
     client.force_authenticate(user=admin_user)
@@ -19,19 +19,19 @@ def generate_order(i):
 
     all_merchant = Merchant.objects.all()
     merchant_ind = i % all_merchant.count()
-    merchant_serialize = MerchantSerializer(
-        all_merchant[merchant_ind], many=False)
-    merchant_id = merchant_serialize.data['id']
+    merchant_id = all_merchant[merchant_ind].id
 
     all_store = Store.objects.filter(merchant=merchant_id).all()
+    if all_store.count() == 0:
+        return
     store_ind = i % all_store.count()
-    store_serialize = StoreSerializer(all_store[store_ind], many=False)
-    store_id = store_serialize.data['id']
+    store_id = all_store[store_ind].id
 
     all_item = Item.objects.filter(merchant=merchant_id).all()
+    if all_item.count() == 0:
+        return
     item_ind = i % all_item.count()
-    item_serialize = ItemSerializer(all_item[item_ind], many=False)
-    item_id = item_serialize.data['id']
+    item_id = all_item[item_ind].id
 
     print('merchant id', merchant_id, ' store id',
           store_id, ' item id', item_id)
