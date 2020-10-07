@@ -6,7 +6,9 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
+from .tasks import create_order
+import structlog
+log = structlog.get_logger()
 # Create your views here.
 
 
@@ -15,6 +17,11 @@ class MerchantViewSet(viewsets.ModelViewSet):
     queryset = Merchant.objects.all()
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        log.msg('Create Merchant Request', req=request)
+        return response
 
     @action(detail=True, methods=['get'])
     def item(self, request, pk=None):
@@ -66,6 +73,11 @@ class StoreViewSet(viewsets.ModelViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        log.msg('Create Store Request', req=request)
+        return response
+
     @action(detail=True, methods=['get'])
     def order(self, request, pk=None):
         # get details of the Store
@@ -105,6 +117,11 @@ class ItemViewSet(viewsets.ModelViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        log.msg('Create Item Request', req=request)
+        return response
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
@@ -116,3 +133,24 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = Order.objects.all()
         serializer = OrderSerializerAll(queryset, many=True)
         return Response(serializer.data)
+
+    def create(self, request):
+        # print('created data', dir(self), dir(request))
+        # print('data is ', request.POST)
+
+        log.msg('Create Order Request', req=request)
+
+        # print('request data: ', request.data)
+        serializer_order = OrderSerializer(data=request.data)
+
+        if serializer_order.is_valid():
+            # print('serialized ', serializer_order.data)
+            create_order.delay(serializer_order.data)
+            # serializer_order.save()
+            return Response({'message': 'order is being processed'})
+
+        # serialized data from request
+        # serialized data isvalid
+        # async tasks -  apply_async
+        # order will be processed
+        return Response({'message': 'bad request'})

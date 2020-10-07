@@ -52,6 +52,9 @@ class OrderSerializer(serializers.ModelSerializer):
     '''
 
     def create(self, validated_data):
+
+        log.msg('Create Order Request', req=self)
+
         item_set = validated_data.pop('items', [])
         total_items = len(item_set)
         total_price = 0.0
@@ -65,6 +68,7 @@ class OrderSerializer(serializers.ModelSerializer):
         for item in item_set:
             order.items.add(item)
         order.save()
+        print('in created of serializer *********')
         return order
 
     def validate_store(self, store):
@@ -92,3 +96,22 @@ class OrderSerializer(serializers.ModelSerializer):
                 "Store Does not Belong to the Merchant")
 
         return store
+
+    def validate_items(self, items):
+        query_dict = QueryDict('', mutable=True)
+        query_dict.update(self.initial_data)
+        self.initial_data = query_dict
+
+        data_merchant_id = int(self.initial_data.get('merchant', default=None))
+        data_items_id = self.initial_data.getlist('items', default=[])
+
+        items = Item.objects.filter(pk__in=data_items_id).all()
+        serialized_items = ItemSerializer(items, many=True)
+
+        # to check if all the items send in order details belong to the same merchant
+        for item in serialized_items.data:
+            if (int(item['merchant']) != data_merchant_id):
+                raise serializers.ValidationError(
+                    "Items Does not Belong to the Store,Merchant")
+
+        return items
