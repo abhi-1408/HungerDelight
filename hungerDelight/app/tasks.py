@@ -6,6 +6,9 @@ from django.urls import reverse, resolve
 from django.contrib.auth.models import User
 from .models import Merchant, Item, Store, Order
 from .serializers import MerchantSerializer, ItemSerializer, StoreSerializer, OrderSerializer
+from datetime import datetime
+import structlog
+logger = structlog.get_logger()
 
 
 @shared_task
@@ -65,11 +68,13 @@ def run(n):
 @shared_task
 def create_order(validated_data):
     # print('got data as in async', order_data)
-    # log.msg('Async Create Order Request', data=validated_data)
-    print('request data in celery', validated_data)
+    log = logger.bind(task='Async Create Order Request', data=validated_data)
+    # print('request data in celery', validated_data)
     store_id = validated_data['store']
     merchant_id = validated_data['merchant']
     item_id = validated_data['items']
+    timestamp = datetime.now(
+    ) if validated_data.get('timestamp') == '' or validated_data.get('timestamp') == None else validated_data.get('timestamp')
 
     merchant = Merchant.objects.filter(id=merchant_id).first()
     store = Store.objects.filter(id=store_id).first()
@@ -81,33 +86,9 @@ def create_order(validated_data):
         total_price += float(item.price)
 
     order = Order.objects.create(
-        timestamp=validated_data['timestamp'], payment_mode=validated_data['payment_mode'], store=store, merchant=merchant, status=validated_data['status'], total_amount=total_price, total_items=total_items)
+        timestamp=timestamp, payment_mode=validated_data['payment_mode'], store=store, merchant=merchant, status=validated_data['status'], total_amount=total_price, total_items=total_items)
     for item in items_list:
         order.items.add(item)
     order.save()
-
-    # serializer_order = OrderSerializer(data=validated)
-    # if serializer_order.is_valid():
-    #     print('VALID')
-    #     serializer_order.save()
-    #     print('SAVED')
-
-    print('create order')
-    # order_data.save()
-    # item_set = validated_data.pop('items', [])
-    #     total_items = len(item_set)
-    #     total_price = 0.0
-    #     for item in item_set:
-    #         total_price += float(item.price)
-
-    #     validated_data['total_items'] = total_items
-    #     validated_data['total_amount'] = total_price
-
-    #     order = Order.objects.create(**validated_data)
-    #     for item in item_set:
-    #         order.items.add(item)
-    #     order.save()
-    # order = Order.objects.create(
-    #     **order_data)
-
-    return
+    log.msg('success', task='order created successfully')
+    # print('order created')

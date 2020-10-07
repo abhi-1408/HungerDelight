@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .tasks import create_order
 import structlog
-log = structlog.get_logger()
+logger = structlog.get_logger()
 # Create your views here.
 
 
@@ -20,7 +20,7 @@ class MerchantViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        log.msg('Create Merchant Request', req=request)
+        logger.msg('Create Merchant Request', req=request)
         return response
 
     @action(detail=True, methods=['get'])
@@ -75,7 +75,7 @@ class StoreViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        log.msg('Create Store Request', req=request)
+        logger.msg('Create Store Request', req=request)
         return response
 
     @action(detail=True, methods=['get'])
@@ -119,7 +119,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        log.msg('Create Item Request', req=request)
+        logger.msg('Create Item Request', req=request)
         return response
 
 
@@ -138,7 +138,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         # print('created data', dir(self), dir(request))
         # print('data is ', request.POST)
 
-        log.msg('Create Order Request', req=request)
+        log = logger.bind(status='Created order request', req=request)
 
         # print('request data: ', request.data)
         serializer_order = OrderSerializer(data=request.data)
@@ -147,6 +147,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             # print('serialized ', serializer_order.data)
             create_order.delay(serializer_order.data)
             # serializer_order.save()
+            log.msg('Create order taken successfully, order is being processed',
+                    status="Create request successful")
             return Response({'message': 'order is being processed'})
 
         # serialized data from request
