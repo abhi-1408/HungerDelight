@@ -1,4 +1,3 @@
 db.sqlite3
-app/migrations
 extras
 *.pyc

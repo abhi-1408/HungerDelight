@@ -38,6 +38,7 @@ To get a local copy up and running follow these simple steps.
 - brew install rabbitmq
 - cd HungerDelight
 - python manage.py migrate
+- python manage.py collectstatic
 - python manage.py runserver
 ```
 
