@@ -1,6 +1,6 @@
 # Hunger Delight
 
-Created a Webapp in Django for managing store,item & merchant.
+Created a Webapp in Django for managing store, item, merchant, order and performing crud operations on these entities.
 
 ## Tech Stack Used
 
@@ -11,10 +11,22 @@ Created a Webapp in Django for managing store,item & merchant.
   - PyTest
   - Celery
   - RabbitMQ
+
   - StructLog
   - Silk Profiling
   - Locust
-  
+
+
+## Features
+
+- Ability to add, update, delete, view(list & detail) for merchant, item, store, order
+- Ability to view
+  - all items belonging to a merchant
+  - all orders placed for a specific merchant
+  - all stores linked with a specific merchant
+  - all items linked with a specific store
+  - all orders placed for a specific store
+
 
 ## Getting Started
 

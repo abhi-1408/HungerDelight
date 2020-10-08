@@ -2,7 +2,7 @@
 
 ### GET `/app`
 
-#### REQUEST
+##### REQUEST
 
 ```json
 {
