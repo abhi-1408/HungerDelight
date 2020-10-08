@@ -1,6 +1,5 @@
 import pytest
-from django.urls import reverse, resolve
-from django.conf import settings
+from django.urls import reverse
 from app.models import Merchant, Item, Store, Order
 from app.serializers import MerchantSerializer, ItemSerializer, StoreSerializer
 from app.views import MerchantViewSet
@@ -10,7 +9,9 @@ from app.views import MerchantViewSet
 class TestCrud:
     @ pytest.mark.django_db
     def test_merchant_list(self, client, merchant):
-
+        '''
+            To test as the merchants created and the merchants fetched are same or not
+        '''
         response = client.get(reverse('merchant-list'))
 
         data = response.json()
@@ -24,7 +25,9 @@ class TestCrud:
 
     @ pytest.mark.django_db
     def test_item_list(self, client, item, merchant):
-
+        '''
+            to check the items created and the items data shown in list view is correct or not
+        '''
         response = client.get(reverse('item-list'))
         data = response.json()
         assert [{
@@ -52,7 +55,9 @@ class TestCrud:
 
     @ pytest.mark.django_db
     def test_store_list(self, client, store):
-
+        '''
+             to check the stores created and the stores data shown in list view is correct or not
+        '''
         response = client.get(reverse('store-list'))
 
         data = response.json()
@@ -69,7 +74,9 @@ class TestCrud:
 
     @ pytest.mark.django_db
     def test_order_list(self, client, order):
-
+        '''
+         to check the orders created and the orders data shown in list view is correct or not
+        '''
         response = client.get(reverse('order-list'))
 
         data = response.json()
@@ -87,9 +94,13 @@ class TestCrud:
 
     @ pytest.mark.django_db
     def test_order_creation_api(self, client, store, merchant, item):
+        '''
+            to check that is a order created successfully by using a post request.
+        '''
         store_serial = StoreSerializer(store, many=False)
         merchant_serial = MerchantSerializer(merchant, many=True)
         item_serial = ItemSerializer(item, many=True)
+
         send_data = {
             "timestamp": "2020-10-01T22:10:00Z",
             "status": "SUCCESS",
@@ -101,7 +112,8 @@ class TestCrud:
             ],
 
         }
-        response = client.post(reverse('order-list'), data=send_data)
+        response = client.post(reverse('order-list'),
+                               data=send_data, format='json')
         assert response.status_code == 201
 
 
@@ -130,7 +142,9 @@ class TestApi:
     }),
     ])
     def test_bad_order_creation_request(self, send_data, client):
-
+        '''
+            to test the if wrong/bad payload is sent for order creation, it should give a HTTP_400
+        '''
         response = client.post(reverse('order-list'), data=send_data)
         assert response.status_code == 400
 
@@ -174,19 +188,28 @@ class TestApi:
             201),
     ])
     def test_order_creation_cycle_request(self, send_data_merchant, send_data_item, send_data_store, send_data_order, status_code, client):
-
+        '''
+            to test the full order creation cycle:
+                1. a merchant created through post request
+                2. a item is created and attached with the merchant through post request
+                3. a store is created and is attched with the merchant through post request
+                4. a order is created for the specific merchant, item a& store.
+        '''
+        # merchant is created
         response_merchant = client.post(reverse('merchant-list'),
                                         data=send_data_merchant)
 
+        # merchant response is used to add merchant_id in the item creation nrequest
         send_data_item['merchant'] = response_merchant.data['id']
         response_item = client.post(
             reverse('item-list'), data=send_data_item)
 
+        #  merchant_id are used in the store creation request
         send_data_store['merchant'] = response_merchant.data['id']
-        send_data_store['items'] = [response_item.data['id']]
         response_store = client.post(
             reverse('store-list'), data=send_data_store)
 
+        # merchant_id, item_id and store_id from previous responses are used in the order creation request
         send_data_order['merchant'] = response_merchant.data['id']
         send_data_order['items'] = [response_item.data['id']]
         send_data_order['store'] = response_store.data['id']

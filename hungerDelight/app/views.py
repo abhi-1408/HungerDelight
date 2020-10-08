@@ -158,6 +158,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         '''
             to do the order creation in async manner
         '''
+        logger.msg('Created async order request', req=request.data)
         log = logger.bind(status='Created order request', req=request.data)
 
         serializer_order = OrderSerializer(data=request.data)

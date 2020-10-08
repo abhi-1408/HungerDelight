@@ -11,10 +11,14 @@ Created a Webapp in Django for managing store,item & merchant.
   - PyTest
   - Celery
   - RabbitMQ
+  - StructLog
+  - Silk Profiling
+  - Locust
+  
 
 ## Getting Started
 
-To get a local copy up and running follow these simple steps.
+To get a local copy up and running, follow these simple steps.
 
 ### Installation
 
@@ -23,7 +27,10 @@ To get a local copy up and running follow these simple steps.
 - virtualenv venv
 - source venv/bin/activate
 - pip install -r requirements.txt
-- brew install rabbitmq
+  
+  For mac:
+  - brew install rabbitmq
+
 - cd HungerDelight
 - python manage.py migrate
 - python manage.py collectstatic
@@ -34,11 +41,15 @@ To get a local copy up and running follow these simple steps.
 
 ```
 cd HungerDelight/hungerDelight
+
+Before running test
+  - in settings.py change CELERY_TASK_ALWAYS_EAGER = True
 - In the Terminal
 	- pytest (to run the test suite)
 
+- after running test make CELERY_TASK_ALWAYS_EAGER = False again
 ```
 
 ## API DOCS Links
 
-You may be using [API DOCS](https://github.com/abhi-1408/HungerDelight/blob/master/README_API.md).
+Refer [API DOCS](https://github.com/abhi-1408/HungerDelight/blob/master/README_API.md).

@@ -131,6 +131,11 @@ USE_L10N = True
 
 USE_TZ = True
 
+# celery config
+broker_url = 'amqp://guest@localhost//'
+CELERY_result_backend = 'rpc://'
+CELERY_TASK_ALWAYS_EAGER = False
+CELERY_result_expires = 3600
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
