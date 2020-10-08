@@ -134,6 +134,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+
+# For Silk Profiler
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_in_env")
 
 STATICFILES_DIRS = [

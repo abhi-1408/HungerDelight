@@ -3,6 +3,11 @@ from locust import HttpUser, task, between
 
 
 class QuickstartUser(HttpUser):
+    '''
+    Locust task file, to test for get request for index, merchant, store, item, order
+                      to test post request for order creation
+
+    '''
     wait_time = between(1, 2)
 
     @task
@@ -37,4 +42,5 @@ class QuickstartUser(HttpUser):
                              "merchant": 2,
                              "items": [
                                  2, 6
-                             ]})
+                             ]}
+                         )

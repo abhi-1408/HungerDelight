@@ -1,16 +1,3 @@
-# from celery import Celery
-
-
-# app = Celery('project', backend='rpc://',
-#              broker='amqp://guest@localhost//',
-#              include=['project.tasks', 'project.generateorder']
-#              )
-
-# if __name__ == '__main__':
-#     app.start()
-#     app.autodiscover_tasks()
-
-from __future__ import absolute_import
 import os
 
 
