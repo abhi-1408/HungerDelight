@@ -21,16 +21,20 @@ class QuickstartUser(HttpUser):
     def item_page(self):
         self.client.get("/app/item/", auth=("admin", "admin"))
 
-    # @task
-    # def order_page(self):
-    #     self.client.post("/app/order/",
-    #                      auth=("admin", "admin"),
-    #                      json={
-    #                          "timestamp": "2020-10-07T06:27:15.381619Z",
-    #                          "status": "AWAITING",
-    #                          "payment_mode": "CASH",
-    #                          "store": 1,
-    #                          "merchant": 2,
-    #                          "items": [
-    #                              3
-    #                          ]})
+    @task
+    def order_page(self):
+        self.client.get("/app/order/", auth=("admin", "admin"))
+
+    @task
+    def order__creation_page(self):
+        self.client.post("/app/order/",
+                         auth=("admin", "admin"),
+                         json={
+                             "timestamp": "2020-10-07T06:27:15.381619Z",
+                             "status": "SUCCESS",
+                             "payment_mode": "CASH",
+                             "store": 3,
+                             "merchant": 2,
+                             "items": [
+                                 2, 6
+                             ]})

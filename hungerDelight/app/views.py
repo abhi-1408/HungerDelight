@@ -1,3 +1,4 @@
+from silk.profiling.profiler import silk_profile
 from rest_framework.parsers import FormParser, JSONParser
 from django.http.request import QueryDict, MultiValueDict
 import ipdb
@@ -73,7 +74,8 @@ class MerchantViewSet(viewsets.ModelViewSet):
 
 class StoreViewSet(viewsets.ModelViewSet):
     serializer_class = StoreSerializer
-    queryset = Store.objects.all()
+    queryset = Store.objects.select_related(
+        'merchant').prefetch_related('items')
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -129,12 +131,14 @@ class ItemViewSet(viewsets.ModelViewSet):
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
-    queryset = Order.objects.all()
+    queryset = Order.objects.select_related('store').select_related(
+        'merchant').prefetch_related('items')
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        queryset = Order.objects.all()
+        queryset = Order.objects.select_related('store').select_related(
+            'merchant').prefetch_related('items')
         serializer = OrderSerializerAll(queryset, many=True)
         return Response(serializer.data)
 
