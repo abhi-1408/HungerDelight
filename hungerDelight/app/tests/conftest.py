@@ -6,31 +6,25 @@ from django.contrib.auth.models import User
 
 @pytest.fixture(scope='module')
 def django_db_setup(request, django_db_setup):
-    print('executing*******')
+    print('started executing*******')
     pass
 
 
 @pytest.fixture
 def client(admin_user):
+    '''
+        to create a client who is authenticated
+    '''
     client = APIClient()
     client.force_authenticate(user=admin_user)
     return client
 
-# @pytest.fixture(scope='session')
-# def client(django_db_setup, django_db_blocker):
-#     with django_db_blocker.unblock():
-#         client = APIClient()
-#         user = User.objects.create_user(
-#             username='admin', password='admin')
-#         client.force_authenticate(user=user)
-#         yield client
-
-#     with django_db_blocker.unblock():
-#         client.force_authenticate(user=None)
-
 
 @pytest.fixture(scope='module')
 def merchant(django_db_setup, django_db_blocker):
+    '''
+        create dummy merchants
+    '''
     with django_db_blocker.unblock():
 
         print('FIXTURE CREATED')
@@ -52,6 +46,9 @@ def merchant(django_db_setup, django_db_blocker):
 
 @pytest.fixture(scope='module')
 def item(django_db_setup, django_db_blocker, merchant):
+    '''
+        creating dummy items
+    '''
     with django_db_blocker.unblock():
         for i in range(3):
 
@@ -70,6 +67,9 @@ def item(django_db_setup, django_db_blocker, merchant):
 @pytest.fixture(scope='module')
 def store(django_db_setup, django_db_blocker, merchant, item):
     with django_db_blocker.unblock():
+        '''
+            creating dummy stores
+        '''
         store = Store.objects.create(
             name="Mumbai BB",
             address="Worli, Mumbai",
@@ -88,6 +88,9 @@ def store(django_db_setup, django_db_blocker, merchant, item):
 
 @pytest.fixture(scope='module')
 def order(django_db_setup, django_db_blocker, merchant, item, store):
+    '''
+        creating dummy order
+    '''
     with django_db_blocker.unblock():
         order = Order.objects.create(
             total_amount='100.000000',
