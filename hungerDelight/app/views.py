@@ -1,3 +1,6 @@
+from rest_framework.parsers import FormParser, JSONParser
+from django.http.request import QueryDict, MultiValueDict
+import ipdb
 from django.shortcuts import render
 from .serializers import MerchantSerializer, StoreSerializer, ItemSerializer, OrderSerializer, OrderSerializerAll
 from .models import Merchant, Store, Item, Order
@@ -9,6 +12,7 @@ from rest_framework.response import Response
 from .tasks import create_order
 import structlog
 logger = structlog.get_logger()
+
 # Create your views here.
 
 
@@ -135,24 +139,16 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        # print('created data', dir(self), dir(request))
-        # print('data is ', request.POST)
 
         log = logger.bind(status='Created order request', req=request)
 
-        # print('request data: ', request.data)
         serializer_order = OrderSerializer(data=request.data)
 
         if serializer_order.is_valid():
-            # print('serialized ', serializer_order.data)
             create_order.delay(serializer_order.data)
-            # serializer_order.save()
+
             log.msg('Create order taken successfully, order is being processed',
                     status="Create request successful")
             return Response({'message': 'order is being processed'})
 
-        # serialized data from request
-        # serialized data isvalid
-        # async tasks -  apply_async
-        # order will be processed
         return Response({'message': 'bad request'})
