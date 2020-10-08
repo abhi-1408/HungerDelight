@@ -1,11 +1,8 @@
 from silk.profiling.profiler import silk_profile
-from rest_framework.parsers import FormParser, JSONParser
-from django.http.request import QueryDict, MultiValueDict
-import ipdb
 from django.shortcuts import render
 from .serializers import MerchantSerializer, StoreSerializer, ItemSerializer, OrderSerializer, OrderSerializerAll
 from .models import Merchant, Store, Item, Order
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
@@ -25,11 +22,14 @@ class MerchantViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        logger.msg('Create Merchant Request', req=request)
+        logger.msg('Create Merchant Request', req=request.data)
         return response
 
     @action(detail=True, methods=['get'])
     def item(self, request, pk=None):
+        '''
+            in nested url , for getting the items beloging to a merchant
+        '''
         # get details of the merchant
         merchant_data = Merchant.objects.filter(id=pk).first()
         serialized_merchant_data = MerchantSerializer(
@@ -44,6 +44,9 @@ class MerchantViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def store(self, request, pk=None):
+        '''
+            in nested url , for getting the stores beloging to a merchant
+        '''
         # get details of the merchant
         merchant_data = Merchant.objects.filter(id=pk).first()
         serialized_merchant_data = MerchantSerializer(
@@ -58,6 +61,9 @@ class MerchantViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def order(self, request, pk=None):
+        '''
+            in nested url , for getting all orders placed for a merchant
+        '''
         # get details of the merchant
         merchant_data = Merchant.objects.filter(id=pk).first()
         serialized_merchant_data = MerchantSerializer(
@@ -81,11 +87,14 @@ class StoreViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        logger.msg('Create Store Request', req=request)
+        logger.msg('Create Store Request', req=request.data)
         return response
 
     @action(detail=True, methods=['get'])
     def order(self, request, pk=None):
+        '''
+            in nested url , for getting all orders placed for a store
+        '''
         # get details of the Store
         store_data = Store.objects.filter(id=pk).first()
         serialized_store_data = StoreSerializer(
@@ -101,6 +110,9 @@ class StoreViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def item(self, request, pk=None):
+        '''
+            in nested url , for getting all items beloging to a store
+        '''
         # get details of the Store
         store_data = Store.objects.filter(id=pk).first()
         serialized_store_data = StoreSerializer(
@@ -125,7 +137,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        logger.msg('Create Item Request', req=request)
+        logger.msg('Create Item Request', req=request.data)
         return response
 
 
@@ -143,16 +155,17 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-
-        log = logger.bind(status='Created order request', req=request)
+        '''
+            to do the order creation in async manner
+        '''
+        log = logger.bind(status='Created order request', req=request.data)
 
         serializer_order = OrderSerializer(data=request.data)
 
-        if serializer_order.is_valid():
+        if serializer_order.is_valid(raise_exception=True):
+            # called the async function for order creation
             create_order.delay(serializer_order.data)
 
             log.msg('Create order taken successfully, order is being processed',
                     status="Create request successful")
-            return Response({'message': 'order is being processed'})
-
-        return Response({'message': 'bad request'})
+            return Response({'message': 'order is being processed'}, status=status.HTTP_201_CREATED)
