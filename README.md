@@ -11,7 +11,6 @@ Created a Webapp in Django for managing store, item, merchant, order and perform
   - PyTest
   - Celery
   - RabbitMQ
-
   - StructLog
   - Silk Profiling
   - Locust
@@ -49,6 +48,32 @@ To get a local copy up and running, follow these simple steps.
 - python manage.py runserver
 ```
 
+#### Installations Issues you might face
+```sh
+in mac 10.15 or above
+ - while installing mysqlclient may give you 
+          Building wheel for ... (setup.py) ... error
+      
+      To resolve this try:
+        - in the terminal
+
+            - xcode-select --install  // to install the tools
+
+            - export CPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include
+
+
+ - while installing locust may give you 
+         Building wheel for ... (setup.py) ... error
+
+      To resolve this try:
+
+        - in the terminal
+          - export PATH=/Applications/Xcode.app/Contents/Developer/usr/bin:$PATH
+
+
+
+```
+
 ### For Testing
 
 ```
@@ -59,9 +84,12 @@ Before running test
 - In the Terminal
 	- pytest (to run the test suite)
 
-- after running test make CELERY_TASK_ALWAYS_EAGER = False again
+  - after running test make CELERY_TASK_ALWAYS_EAGER = False 
 ```
 
 ## API DOCS Links
 
 Refer [API DOCS](https://github.com/abhi-1408/HungerDelight/blob/master/README_API.md).
+
+
+
