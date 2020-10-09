@@ -48,7 +48,7 @@ To get a local copy up and running, follow these simple steps.
 - python manage.py runserver
 ```
 
-#### Installations Issues you might face
+#### Installation Issues you might face
 ```
 in mac 10.15 or above
  - while installing mysqlclient may give you 
