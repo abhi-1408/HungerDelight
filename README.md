@@ -33,7 +33,7 @@ To get a local copy up and running, follow these simple steps.
 
 ### Installation
 
-```sh
+```
 - git clone https://github.com/abhi-1408/HungerDelight
 - virtualenv venv
 - source venv/bin/activate
@@ -49,7 +49,7 @@ To get a local copy up and running, follow these simple steps.
 ```
 
 #### Installations Issues you might face
-```sh
+```
 in mac 10.15 or above
  - while installing mysqlclient may give you 
           Building wheel for ... (setup.py) ... error
