@@ -1,3 +1,5 @@
+import json
+import requests
 from celery import shared_task
 from rest_framework.test import APIClient
 from django.urls import reverse
@@ -107,4 +109,19 @@ def create_order(validated_data):
     order.save()
     log.msg('success', task='order created successfully')
 
+    serial_order = OrderSerializer(order)
+    return serial_order.data
+
+
+@shared_task
+def webhook(order_data):
+
+    res = requests.post('https://339898b5fcbf.ngrok.io/',
+                        json=order_data)
+    return res
+
+
+@shared_task
+def myerror(uuid):
+    print('IN ERROR', uuid)
     return
