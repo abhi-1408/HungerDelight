@@ -153,6 +153,12 @@ class OrderViewSet(viewsets.ModelViewSet):
     def list(self, request):
         queryset = Order.objects.select_related('store').select_related(
             'merchant').prefetch_related('items')
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = OrderSerializerAll(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = OrderSerializerAll(queryset, many=True)
         return Response(serializer.data)
 
