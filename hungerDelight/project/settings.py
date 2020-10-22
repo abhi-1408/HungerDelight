@@ -26,6 +26,7 @@ SECRET_KEY = '!ab1yd39ed#+v($wr4=n&&u!tftn-eopfezej!!9&zpk$8ksw#'
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'testserver']
+# ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -57,6 +58,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'project.urls'
 
 REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
 
@@ -149,3 +152,11 @@ STATICFILES_DIRS = [
 
 
 STATIC_URL = '/static/'
+
+
+# try
+SILKY_PYTHON_PROFILER = True
+SILKY_PYTHON_PROFILER_BINARY = True
+# SILKY_STORAGE_CLASS = 'path.to.StorageClass'
+# SILKY_PYTHON_PROFILER_RESULT_PATH = '/path/to/profiles/'
+SILKY_PYTHON_PROFILER_RESULT_PATH = '/Users/abhishek/Downloads/urbanpiperMain/HungerDelight/hungerDelight/cprofile'

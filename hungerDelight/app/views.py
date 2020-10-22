@@ -1,3 +1,5 @@
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
 from silk.profiling.profiler import silk_profile
 from django.shortcuts import render
 from .serializers import MerchantSerializer, StoreSerializer, ItemSerializer, OrderSerializer, OrderSerializerAll
@@ -7,7 +9,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .tasks import create_order
+from .tasks import create_order, myerror, webhook
 import structlog
 logger = structlog.get_logger()
 
@@ -165,8 +167,15 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         if serializer_order.is_valid(raise_exception=True):
             # called the async function for order creation
-            create_order.delay(serializer_order.data)
+            # create_order(serializer_order.data)
+            create_order.apply_async(
+                args=[serializer_order.data], link=webhook.s(), link_error=myerror.s())
 
             log.msg('Create order taken successfully, order is being processed',
                     status="Create request successful")
             return Response({'message': 'order is being processed'}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'POST'])
+def webhook_acknowledge(request):
+    return JsonResponse({'msg': 'webhook received', 'payload': request.data})

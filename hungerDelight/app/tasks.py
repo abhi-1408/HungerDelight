@@ -1,3 +1,6 @@
+from celery import states
+import json
+import requests
 from celery import shared_task
 from rest_framework.test import APIClient
 from django.urls import reverse
@@ -6,6 +9,7 @@ from .models import Merchant, Item, Store, Order
 from .serializers import MerchantSerializer, ItemSerializer, StoreSerializer, OrderSerializer
 from datetime import datetime
 import structlog
+from project.celery import app
 logger = structlog.get_logger()
 
 
@@ -70,8 +74,8 @@ def run(n):
     return async_ids
 
 
-@shared_task
-def create_order(validated_data):
+@app.task(bind=True, autoretry_for=(Exception,), max_retries=5, default_retry_delay=20)
+def create_order(self, validated_data):
     '''
         async order creation, it fetches from the queue for any order related data,
             if there is a data in queue, it creates the order for it in the models.
@@ -107,4 +111,24 @@ def create_order(validated_data):
     order.save()
     log.msg('success', task='order created successfully')
 
+    serial_order = OrderSerializer(order)
+    return serial_order.data
+
+
+@app.task(bind=True)
+def webhook(self, order_data):
+
+    logger.msg('webook request sent', order_data=order_data)
+    res = requests.post('http://localhost:8000/app/webhook/',
+                        json=order_data)
+
+    # if res.status_code == 400:
+    #     self.update_state(state=states.FAILURE)
+    # print(dir(self))
+    return res
+
+
+@app.task(bind=True)
+def myerror(self, uuid):
+    logger.msg('webook request failed', uuid=uuid)
     return
