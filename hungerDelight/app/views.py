@@ -1,3 +1,5 @@
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
 from silk.profiling.profiler import silk_profile
 from django.shortcuts import render
 from .serializers import MerchantSerializer, StoreSerializer, ItemSerializer, OrderSerializer, OrderSerializerAll
@@ -172,3 +174,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             log.msg('Create order taken successfully, order is being processed',
                     status="Create request successful")
             return Response({'message': 'order is being processed'}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'POST'])
+def webhook_acknowledge(request):
+    return JsonResponse({'msg': 'webhook received', 'payload': request.data})

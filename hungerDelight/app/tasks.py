@@ -111,8 +111,7 @@ def create_order(self, validated_data):
     order.save()
     log.msg('success', task='order created successfully')
 
-    serial_order = OrderSerializer(data=order)
-    raise Exception('NOT PRESENT')
+    serial_order = OrderSerializer(order)
     return serial_order.data
 
 
@@ -120,7 +119,7 @@ def create_order(self, validated_data):
 def webhook(self, order_data):
 
     logger.msg('webook request sent', order_data=order_data)
-    res = requests.post('https://339898b5fcbf.ngrok.io/',
+    res = requests.post('http://localhost:8000/app/webhook/',
                         json=order_data)
 
     # if res.status_code == 400:
