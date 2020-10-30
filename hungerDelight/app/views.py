@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from silk.profiling.profiler import silk_profile
 from django.shortcuts import render
+from django.db.models import Q
 from .serializers import MerchantSerializer, StoreSerializer, ItemSerializer, OrderSerializer, OrderSerializerAll
 from .models import Merchant, Store, Item, Order
 from rest_framework import viewsets, status
@@ -9,6 +10,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import pagination
 from .tasks import create_order, myerror, webhook
 import structlog
 logger = structlog.get_logger()
@@ -143,6 +145,18 @@ class ItemViewSet(viewsets.ModelViewSet):
         return response
 
 
+class CustomPagination(pagination.PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'results': data
+        })
+
+
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     queryset = Order.objects.select_related('store').select_related(
@@ -151,8 +165,17 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        queryset = Order.objects.select_related('store').select_related(
-            'merchant').prefetch_related('items')
+        queryset = self.get_queryset()
+        
+        if 'Postman' in request.META.get('HTTP_USER_AGENT') and (request.GET.get('start')!= None) and (request.GET.get('end')!= None):
+            start = int(request.GET.get('start'))
+            end = int(request.GET.get('end'))
+            queryset = queryset.filter(Q(id__gte=start),Q(id__lte=end))
+            serializer = OrderSerializerAll(queryset, many=True)
+            return Response(serializer.data)
+
+        # queryset = Order.objects.select_related('store').select_related(
+        #     'merchant').prefetch_related('items')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
